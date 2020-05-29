@@ -10,16 +10,13 @@ particlesJS.load('particles-js', 'particles.json', function() {
 */
 
 /* Otherwise just put the config content (json): */
-
-particlesJS('particles-js',
-  
-  {
+var paramss = {
     "particles": {
       "number": {
-        "value": 400,
+        "value": 200,
         "density": {
-          "enable": false,
-          "value_area": 800
+          "enable": true,
+          "value_area": 1600
         }
       },
       "color": {
@@ -128,6 +125,16 @@ particlesJS('particles-js',
       "background_repeat": "no-repeat",
       "background_size": "cover"
     }
-  }
+  };
+
+particlesJS('particles-js',
+  
+  paramss
+
+);
+
+particlesJS('particles-js2',
+  
+  paramss
 
 );
