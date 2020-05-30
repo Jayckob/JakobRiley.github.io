@@ -246,6 +246,8 @@ var pJS = function(tag_id, params){
 
   /* --------- pJS functions - particles ----------- */
 
+  var colorss = ["#00cc00","#0066ff","#ff0066","#ffff00"];
+
   pJS.fn.particle = function(color, opacity, position){
 
     /* size */
@@ -257,6 +259,8 @@ var pJS = function(tag_id, params){
         this.vs = this.vs * Math.random();
       }
     }
+
+    this.hasfriction = true;
 
     /* position */
     this.x = position ? position.x : Math.random() * pJS.canvas.w;
@@ -736,6 +740,36 @@ var pJS = function(tag_id, params){
 
   };
 
+function rgbToHsl(r, g, b){
+    r /= 255, g /= 255, b /= 255;
+    var max = Math.max(r, g, b), min = Math.min(r, g, b);
+    var h, s, l = (max + min) / 2;
+
+    if(max == min){
+        h = s = 0; // achromatic
+    }else{
+        var d = max - min;
+        s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+        switch(max){
+            case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+            case g: h = (b - r) / d + 2; break;
+            case b: h = (r - g) / d + 4; break;
+        }
+        h /= 6;
+    }
+
+    return [Math.floor(h * 360), Math.floor(s * 100), Math.floor(l * 100)];
+  }
+
+  var balance = [0, 0, 1];
+  function colorDistance(color1, color2) {
+    var result = 0;
+    color1 = rgbToHsl(color1[0], color1[1], color1[2]);
+    color2 = rgbToHsl(color2[0], color2[1], color2[2]);
+    for (var i = 0; i < color1.length; i++)
+        result += (color1[i] - color2[i]) * (color1[i] - color2[i]) * balance[i];
+    return result;
+  }
 
   pJS.fn.interact.attractParticles  = function(p1, p2){
 
@@ -746,14 +780,21 @@ var pJS = function(tag_id, params){
 	
 	var multco = 0.1;
 	var capspeed = 0.01;
-	var topspeed = 0.0;
+	var topspeed = 0.21;
 	
 	var ax = (p1.x > p2.x ? (-dx)/pJS.particles.move.attract.rotateX : (dx)/pJS.particles.move.attract.rotateX);
 	var ay = (p1.y > p2.y ? (-dy)/pJS.particles.move.attract.rotateY : (dy)/pJS.particles.move.attract.rotateY);
   var g = 1.00674;
 
-  var prefereddistance = 150;
+  var prefereddistance = 350;
+  if(p1.color.rgb['r'] == p2.color.rgb['r'] && p1.color.rgb['g'] == p2.color.rgb['g'] && p1.color.rgb['b'] == p2.color.rgb['b']){
+    prefereddistance = 100;
+  }
+
   var distanceaway = dist - prefereddistance;
+  //.rgb
+
+  //console.log(p2.color.rgb['r']);
 
   p1.vx += (ax * distanceaway * g)/(dist**2);
   p1.vy += (ay * distanceaway * g)/(dist**2);
@@ -761,18 +802,27 @@ var pJS = function(tag_id, params){
   dx = Math.abs(p1.vx);
   dy = Math.abs(p1.vy);
   velocity = Math.sqrt(dx*dx + dy*dy);
-  
-if(velocity > topspeed){
-  
-    var slowdownamount = 0.001;
-  
-    var px = p1.vx/velocity;
-    var py = p1.vy/velocity;
+
+if(p1.hasfriction){
+  if(velocity > topspeed){
     
-    p1.vx -= px*slowdownamount;
-    p1.vy -= py*slowdownamount;
-  
-  }
+      var slowdownamount = 0.001;
+    
+      var px = p1.vx/velocity;
+      var py = p1.vy/velocity;
+      
+      p1.vx -= px*slowdownamount;
+      p1.vy -= py*slowdownamount;
+    
+    }
+
+    if(velocity > 100){
+    
+      p1.vx = 0;
+      p1.vy = 0;
+    
+    }
+}
 
 	/*
     if(dist <= p1.radius * 10){
