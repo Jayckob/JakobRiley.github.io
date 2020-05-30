@@ -87,7 +87,6 @@ var pJS = function(tag_id, params){
         random: false,
         straight: false,
         out_mode: 'bounce',
-        bounce: true,
         attract: {
           enable: true,
           rotateX: 60,
@@ -144,27 +143,7 @@ var pJS = function(tag_id, params){
   };
 
   var pJS = this.pJS;
-  
-	function createArray(length) {
-		var arr = new Array(length || 0),
-			i = length;
 
-		if (arguments.length > 1) {
-			var args = Array.prototype.slice.call(arguments, 1);
-			while(i--) arr[length-1 - i] = createArray.apply(this, args);
-		}
-
-		return arr;
-	}
-	
-	
-	function createParticle(x,y){
-		p = new particle(x,y);
-		return p;
-	}
-	
-	
-	
   /* params settings */
   if(params){
     Object.deepExtend(pJS, params);
@@ -767,11 +746,35 @@ var pJS = function(tag_id, params){
 	
 	var multco = 0.1;
 	var capspeed = 0.01;
-	var topspeed = 0.00001;
+	var topspeed = 0.0;
 	
 	var ax = (p1.x > p2.x ? (-dx)/pJS.particles.move.attract.rotateX : (dx)/pJS.particles.move.attract.rotateX);
 	var ay = (p1.y > p2.y ? (-dy)/pJS.particles.move.attract.rotateY : (dy)/pJS.particles.move.attract.rotateY);
-	
+  var g = 1.00674;
+
+  var prefereddistance = 150;
+  var distanceaway = dist - prefereddistance;
+
+  p1.vx += (ax * distanceaway * g)/(dist**2);
+  p1.vy += (ay * distanceaway * g)/(dist**2);
+
+  dx = Math.abs(p1.vx);
+  dy = Math.abs(p1.vy);
+  velocity = Math.sqrt(dx*dx + dy*dy);
+  
+if(velocity > topspeed){
+  
+    var slowdownamount = 0.001;
+  
+    var px = p1.vx/velocity;
+    var py = p1.vy/velocity;
+    
+    p1.vx -= px*slowdownamount;
+    p1.vy -= py*slowdownamount;
+  
+  }
+
+	/*
     if(dist <= p1.radius * 10){
 		
 		
@@ -780,9 +783,12 @@ var pJS = function(tag_id, params){
 		//p1.vx = p1.vx * 0.1;
 		//p1.vy = p1.vy * 0.1;
     }
-	
+	*/
 	//multco = 0.2;
-	
+
+  // y = x**2
+  // force = (distance - distancetohoverat) ** 2
+	/*
 	if(dist >= p1.radius * 10 && dist <= p1.radius * 30
 	){
 
@@ -808,7 +814,7 @@ var pJS = function(tag_id, params){
 		p1.vy -= py*slowdownamount;
 	
 	}
-	
+	*/
 	/*
 	if(p1.vx > topspeed){
 			p1.vx -= capspeed;
@@ -1557,6 +1563,7 @@ var pJS = function(tag_id, params){
   };
 
 
+
   pJS.fn.vendors.init = function(){
 
     /* init canvas + particles */
@@ -1705,6 +1712,10 @@ window.particlesJS = function(tag_id, params){
   }
 
 };
+
+
+
+
 /*
 window.particlesJS.loadness = function(tag_id, path_config_json, callback){
 
